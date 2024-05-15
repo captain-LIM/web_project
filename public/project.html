@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="shortcut icon" href="photo/favicon.ico" />
+  <title>국민대 물품 대여 서비스</title>
+  <link rel="stylesheet" href="/css/project.css">
+  <script src="project.js"></script>
+  <script>
+    function showPopup() {
+        alert('회원가입이 완료되었습니다.');
+    }
+
+    function login() {
+        const id = document.getElementById('number').value;
+        const password = document.getElementById('password').value;
+
+        fetch('/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id, password })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                const name = data.name;
+                const rentedItems = data.rentedItems;
+                document.getElementById('loginSection').style.display = 'none';
+                document.getElementById('logoutSection').style.display = 'block';
+                document.getElementById('welcomeMessage').innerText = `${name} 님 환영합니다`;
+                document.getElementById('rentedItems').innerText = rentedItems;
+            } else {
+                alert('로그인 실패');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function rentItem(item) {
+        fetch('/rent', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ item })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById(`${item}Count`).innerText = data.count;
+                const rentedItems = document.getElementById('rentedItems');
+                if (rentedItems.innerText === "") {
+                    rentedItems.innerText = item;
+                } else {
+                    rentedItems.innerText += `, ${item}`;
+                }
+            } else {
+                alert('대여 실패: 재고가 없습니다.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
+    }
+
+    function logout() {
+        fetch('/logout', {
+            method: 'POST'
+        })
+        .then(() => {
+            location.reload();
+        })
+        .catch(error => console.error('Error:', error));
+    }
+  </script>
+</head>
+
+<body>
+  <!--제목-->
+  <h1>
+    <a href="project.html">국민대학교 <mark><strong>물품 대여</strong></mark> 서비스</a>
+  </h1>
+  <h3>각 1일 5000원</h3>
+
+  <!-- 로그인/로그아웃 -->
+  <div id="loginSection">
+    <form id="loginForm" onsubmit="login(); return false;">
+      <fieldset>
+        <ul>
+          <li>
+            <label for="number">ID</label>
+            <input type="number" name="id" id="number" required placeholder="학번">
+          </li>
+          <li>
+            <label for="password">PW</label>
+            <input type="password" name="password" id="password" required placeholder="비밀번호">
+          </li>
+        </ul>
+        <input type="submit" value="로그인">
+        <a href="membership.html"><input type="button" value="회원가입"></a>
+      </fieldset>
+    </form>
+  </div>
+
+  <!-- 로그아웃 -->
+  <div id="logoutSection" style="display: none;">
+    <button onclick="logout()">로그아웃</button>
+  </div>
+
+  <!-- 환영 메시지 -->
+  <div id="welcomeMessage"></div>
+  
+  <!-- 현재 대여 물품 -->
+  <div>현재 대여 물품: <span id="rentedItems"></span></div>
+
+  <!--물품-->
+  <div class="item-container">
+    <div>
+      <img class="notebook" src="photo/notebook.png" alt="노트북">
+      <button name="button" onclick="rentItem('notebook')">대여</button> 수량 <span id="notebookCount">5</span>
+      <span id="notebookStatus"></span>
+    </div>
+    <div>
+      <img class="umbrella" src="photo/umbrella.png" alt="우산">
+      <button name="button" onclick="rentItem('umbrella')">대여</button> 수량 <span id="umbrellaCount">10</span>
+      <span id="umbrellaStatus"></span><br />
+    </div>
+    <div>
+      <img class="tabletpc" src="photo/tabletpc.png" alt="태블릿pc">
+      <button name="button" onclick="rentItem('tabletpc')">대여</button> 수량 <span id="tabletpcCount">5</span>
+      <span id="tabletpcStatus"></span>
+    </div>
+    <div>
+      <img class="charger" src="photo/charger.png" alt="충전기">
+      <button name="button" onclick="rentItem('charger')">대여</button> 수량 <span id="chargerCount">10</span>
+      <span id="chargerStatus"></span>
+    </div>
+    <div>
+      <img class="pen" src="photo/pen.png" alt="애플펜슬">
+      <button name="button" onclick="rentItem('pen')">대여</button> 수량 <span id="penCount">10</span>
+      <span id="penStatus"></span>
+    </div>
+  </div>
+
+</body>
+
+</html>
